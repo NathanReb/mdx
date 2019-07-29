@@ -1,6 +1,6 @@
 # Using local library
 
-```ocaml require=example_lib
+```ocaml
 # #require "example_lib";;
 # Example_lib.hello ()
 Hello world!
@@ -9,7 +9,7 @@ Hello world!
 
 # Sub library
 
-```ocaml require=example_lib.b
+```ocaml
 # #require "example_lib.b";;
 # Lib_b.hello ()
 Hello world!

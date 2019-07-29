@@ -149,7 +149,6 @@ let labels = [
   `Label "skip"             , [`None];
   `Label "non-deterministic", [`None; `Some "command"; `Some "output"];
   `Label "version"          , [`Any];
-  `Label "require"          , [`Any];
   `Prefix "set-"            , [`Any];
   `Prefix "unset-"          , [`None];
 ]
@@ -289,14 +288,27 @@ let unset_variables t =
   in
   List.map f (get_prefixed_labels t "unset-")
 
-let required_packages t =
-  let f = function
-    | `Eq, "" ->
-      Fmt.failwith "invalid `require` label value: requires a value"
-    | `Eq, pkg -> pkg
-    | _ -> Fmt.failwith "invalid `env` label value"
-  in
-  List.map f (get_labels t "require")
+let require_re =
+  let open Re in
+  seq [str "#require \""; group (rep1 any); str "\""]
+
+let require_from_line line =
+  let open Rresult.R.Infix in
+  let re = Re.compile require_re in
+  match Re.exec_opt re line with
+  | None -> Ok Library.Set.empty
+  | Some group ->
+    let matched = Re.Group.get group 1 in
+    let libs_str = String.cuts ~sep:"," matched in
+    Util.Result.List.map ~f:Library.from_string libs_str >>| fun libs ->
+    List.fold_left (fun acc l -> Library.Set.add l acc) Library.Set.empty libs
+
+let require_from_lines lines =
+  let open Rresult.R.Infix in
+  Util.Result.List.map ~f:require_from_line lines >>| fun libs ->
+  List.fold_left Library.Set.union Library.Set.empty libs
+
+let required_libraries t = require_from_lines t.contents
 
 let value t = t.value
 let section t = t.section
@@ -414,28 +426,3 @@ let version_enabled t =
   let curr_version = Misc.parse_version Sys.ocaml_version in
   let op, x, y, z = version t in
   (compare op) (compare_versions curr_version (x, y, z)) 0
-
-let require_re =
-  let open Re in
-  seq [str "#require \""; group (rep1 any); str "\""]
-
-let parse_libs l =
-  let open Rresult.R.Infix in
-  let rec go acc = function
-    | [] -> Ok acc
-    | hd::tl ->
-      Library.from_string hd >>= fun lib ->
-      go (lib::acc) tl
-  in
-  go [] l
-      
-let require_from_line line =
-  let open Rresult.R.Infix in
-  let re = Re.compile require_re in
-  match Re.exec_opt re line with
-  | None -> Ok Library.Set.empty
-  | Some group ->
-    let matched = Re.Group.get group 1 in
-    let libs_str = String.cuts ~sep:"," matched in
-    parse_libs libs_str >>| fun libs ->
-    List.fold_left (fun acc l -> Library.Set.add l acc) Library.Set.empty libs

@@ -45,7 +45,7 @@ let ansi_color_strip str =
   in
   loop 0
 
-let output_from_line s = 
+let output_from_line s =
   `Output (String.drop ~rev:true ~sat:Char.Ascii.is_blank s)
 
 let with_dir root f =
@@ -153,8 +153,8 @@ let split_lines lines =
   in
   List.fold_left aux [] (List.rev lines)
 
-let run_toplevel_tests ?root c ppf tests t =
-  Block.pp_header ppf t;
+let run_toplevel_tests ?syntax ?root c ppf tests t =
+  Block.pp_header ?syntax ppf t;
   List.iter (fun test ->
       let lines = lines (eval_test ?root t c test) in
       let lines = split_lines lines in
@@ -172,7 +172,7 @@ let run_toplevel_tests ?root c ppf tests t =
             Output.pp ~pad ppf (`Output line)
         ) output;
     ) tests;
-  Block.pp_footer ppf ()
+  Block.pp_footer ?syntax ppf ()
 
 type file = { first: Mdx_top.Part.file; current: Mdx_top.Part.file }
 
@@ -298,11 +298,11 @@ let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
     (* Print errors *)
     | _, _, _, Error _ -> Block.pp ?syntax ppf t
     (* Skip or copy raw blocks. Without parts support *)
-    | true, _, _, Raw -> 
+    | true, _, _, Raw ->
     (match Block.part t with
-      | None -> 
+      | None ->
         (match Block.file t with
-          | Some file -> 
+          | Some file ->
             let new_content = (read_part file (Block.part t)) in
             update_block_content ppf t new_content
           | None -> Block.pp ?syntax ppf t )
@@ -321,7 +321,7 @@ let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
         ) tests
     | true, false, `Non_det `Output, Toplevel tests ->
       assert (syntax <> Some Cram);
-      Block.pp ppf t;
+      Block.pp ?syntax ppf t;
       List.iter (fun test ->
           match eval_test t ?root c test with
           | Ok _    -> ()
@@ -338,7 +338,7 @@ let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
          update_file_or_block ?root ppf file ml_file t direction
        | None ->
          eval_raw t ?root c ~line:t.line t.contents;
-         Block.pp ppf t )
+         Block.pp ?syntax ppf t )
     (* Cram tests. *)
     | true, _, _, Cram { tests; pad } ->
       run_cram_tests ?syntax t ?root ppf temp_file pad tests
@@ -349,7 +349,7 @@ let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
       | Some ml_file ->
         update_file_or_block ?root ppf file ml_file t direction
       | None ->
-        run_toplevel_tests ?root c ppf tests t
+        run_toplevel_tests ?syntax ?root c ppf tests t
   in
   let gen_corrected file_contents items =
     let temp_file = Filename.temp_file "ocaml-mdx" ".output" in

@@ -36,6 +36,18 @@
  (action (diff cram/test-case.t cram.actual)))
 
 (rule
+ (target default-env-prelude-is-shared.actual)
+ (deps (package mdx) (source_tree default-env-prelude-is-shared))
+ (action
+  (with-stdout-to %{target}
+   (chdir default-env-prelude-is-shared
+    (run ocaml-mdx test --output - --prelude default.ml --prelude a:a.ml --prelude b:b.ml test-case.md)))))
+
+(rule
+ (alias runtest)
+ (action (diff default-env-prelude-is-shared/test-case.md default-env-prelude-is-shared.actual)))
+
+(rule
  (target ellipsis.actual)
  (deps (package mdx) (source_tree ellipsis))
  (action

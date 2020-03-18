@@ -262,7 +262,7 @@ let with_non_det ~command ~output ~det non_deterministic = function
   | Some Label.Nd_output when not non_deterministic -> output ()
   | _ -> det ()
 
-let eval_prelude ?root top prelude prelude_str =
+let eval_preludes ?root top prelude prelude_str =
   let aux to_lines p =
     let env, f = Mdx.Prelude.env_and_file p in
     let eval () = eval_raw ?root top ~line:0 (to_lines f) in
@@ -277,7 +277,7 @@ let eval_prelude ?root top prelude prelude_str =
 let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
     (`Silent_eval silent_eval) (`Record_backtrace record_backtrace)
     (`Syntax syntax) (`Silent silent) (`Verbose_findlib verbose_findlib)
-    (`Prelude prelude) (`Prelude_str prelude_str) (`File file)
+    (`Preludes preludes) (`Preludes_str preludes_str) (`File file)
     (`Section section) (`Root root) (`Force_output force_output)
     (`Output output) =
   Printexc.record_backtrace record_backtrace;
@@ -285,7 +285,7 @@ let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
     match syntax with Some syntax -> Some syntax | None -> Syntax.infer ~file
   in
   let c = Mdx_top.init ~verbose:(not silent_eval) ~silent ~verbose_findlib () in
-  eval_prelude ?root c prelude prelude_str;
+  eval_preludes ?root c preludes preludes_str;
 
   let test_block ~ppf ~temp_file t =
     let print_block () = Block.pp ?syntax ppf t in
@@ -409,7 +409,7 @@ let cmd =
   ( Term.(
       pure run $ Cli.setup $ Cli.non_deterministic $ Cli.silent_eval
       $ Cli.record_backtrace $ Cli.syntax $ Cli.silent $ Cli.verbose_findlib
-      $ Cli.prelude $ Cli.prelude_str $ Cli.file $ Cli.section $ Cli.root
+      $ Cli.preludes $ Cli.preludes_str $ Cli.file $ Cli.section $ Cli.root
       $ Cli.force_output $ Cli.output),
     Term.info "ocaml-mdx-test" ~version:"%%VERSION%%" ~doc ~exits ~man )
 

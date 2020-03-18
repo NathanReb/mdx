@@ -18,9 +18,9 @@ val silent : [> `Silent of bool ] t
 
 val verbose_findlib : [> `Verbose_findlib of bool ] t
 
-val prelude : [> `Prelude of string list ] t
+val preludes : [> `Preludes of string list ] t
 
-val prelude_str : [> `Prelude_str of string list ] t
+val preludes_str : [> `Preludes_str of string list ] t
 
 val root : [> `Root of string option ] t
 

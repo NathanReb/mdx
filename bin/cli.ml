@@ -66,7 +66,7 @@ let verbose_findlib =
     (fun x -> `Verbose_findlib x)
     Arg.(value & flag & info [ "verbose-findlib" ] ~doc)
 
-let prelude =
+let preludes =
   let doc =
     "A file to load as prelude. Can be prefixed with $(i,env:) to specify a \
      specific environment to load the prelude in. Multiple prelude files can \
@@ -74,10 +74,10 @@ let prelude =
      command-line."
   in
   named
-    (fun x -> `Prelude x)
+    (fun x -> `Preludes x)
     Arg.(value & opt_all string [] & info [ "prelude" ] ~doc ~docv:"FILE")
 
-let prelude_str =
+let preludes_str =
   let doc =
     "A string to load as prelude. Can be prefixed with $(i,env:) to specify a \
      specific environment to load the prelude in (the environment name should \
@@ -85,7 +85,7 @@ let prelude_str =
      will be evaluated in the order they are provided on the command-line."
   in
   named
-    (fun x -> `Prelude_str x)
+    (fun x -> `Preludes_str x)
     Arg.(value & opt_all string [] & info [ "prelude-str" ] ~doc ~docv:"STR")
 
 let root =

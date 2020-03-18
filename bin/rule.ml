@@ -42,7 +42,7 @@ let pp_locks_field fmt dirs_and_files =
   | locks ->
       Fmt.pf fmt " (locks @[%a@])\n" Fmt.(list ~sep:(unit "@\n") string) locks
 
-let pp_rules ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~locks fmt
+let pp_rules ~nd ~preludes ~md_file ~ml_files ~dirs ~root ~packages ~locks fmt
     options =
   let ml_files = List.map (prepend_root root) (String.Set.elements ml_files) in
   let dirs =
@@ -57,7 +57,7 @@ let pp_rules ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~locks fmt
         String.Set.elements dirs
   in
   let prelude_files =
-    let files = String.Set.of_list (List.map prelude_file prelude) in
+    let files = String.Set.of_list (List.map prelude_file preludes) in
     String.Set.elements files
   in
   let var_names =
@@ -69,8 +69,8 @@ let pp_rules ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~locks fmt
     let packages = List.map (fun p -> `Package p) (String.Set.elements packages)
     and ml_files = List.map2 (fun name p -> `Named (name, p)) var_names ml_files
     and dirs = List.map (fun p -> `Source_tree p) dirs
-    and prelude = List.map (fun p -> `Path p) prelude_files in
-    (`Named ("x", md_file) :: packages) @ ml_files @ dirs @ prelude
+    and preludes = List.map (fun p -> `Path p) prelude_files in
+    (`Named ("x", md_file) :: packages) @ ml_files @ dirs @ preludes
   in
   let actions arg =
     `Run (("ocaml-mdx" :: "test" :: options) @ arg @ root @ [ "%{x}" ])
@@ -143,7 +143,7 @@ let aggregate_requires ~require_from l =
     ~init:Mdx.Library.Set.empty l
   >>| Mdx.Library.Set.to_package_set
 
-let requires_from_prelude_str prelude_str_list =
+let requires_from_preludes_str prelude_str_list =
   let require_from prelude_str =
     let _, prelude = Mdx.Prelude.env_and_file prelude_str in
     let lines =
@@ -155,7 +155,7 @@ let requires_from_prelude_str prelude_str_list =
   in
   aggregate_requires ~require_from prelude_str_list
 
-let requires_from_prelude prelude_list =
+let requires_from_preludes prelude_list =
   let require_from prelude =
     let _, prelude = Mdx.Prelude.env_and_file prelude in
     let lines = Mdx.Util.File.read_lines prelude in
@@ -164,7 +164,7 @@ let requires_from_prelude prelude_list =
   aggregate_requires ~require_from prelude_list
 
 let run (`Setup ()) (`File md_file) (`Section section) (`Syntax syntax)
-    (`Prelude prelude) (`Prelude_str prelude_str) (`Root root)
+    (`Preludes preludes) (`Preludes_str preludes_str) (`Root root)
     (`Duniverse_mode duniverse_mode) (`Locks locks) =
   let open Mdx.Util.Result.Infix in
   let active =
@@ -212,9 +212,10 @@ let run (`Setup ()) (`File md_file) (`Section section) (`Syntax syntax)
     let req_res =
       let packages =
         if duniverse_mode then
-          requires_from_prelude prelude >>= fun prelude_requires ->
-          requires_from_prelude_str prelude_str >>= fun prelude_str_requires ->
-          Ok (String.Set.union prelude_requires prelude_str_requires)
+          requires_from_preludes preludes >>= fun preludes_requires ->
+          requires_from_preludes_str preludes_str
+          >>= fun preludes_str_requires ->
+          Ok (String.Set.union preludes_requires preludes_str_requires)
         else Ok String.Set.empty
       in
       packages >>= fun packages ->
@@ -231,12 +232,12 @@ let run (`Setup ()) (`File md_file) (`Section section) (`Syntax syntax)
           if duniverse_mode then String.Set.add "mdx" packages else packages
         in
         let options =
-          List.map (Fmt.to_to_string pp_prelude) prelude
-          @ List.map (Fmt.to_to_string pp_prelude_str) prelude_str
+          List.map (Fmt.to_to_string pp_prelude) preludes
+          @ List.map (Fmt.to_to_string pp_prelude_str) preludes_str
           @ options_of_syntax syntax @ options_of_section section
         in
         let pp_rules fmt () =
-          pp_rules ~md_file ~prelude ~nd ~ml_files ~dirs ~root ~packages ~locks
+          pp_rules ~md_file ~preludes ~nd ~ml_files ~dirs ~root ~packages ~locks
             fmt options
         in
         print_format_dune_rules pp_rules;
@@ -268,6 +269,6 @@ let locks =
 let cmd =
   let doc = "Produce dune rules to synchronize markdown and OCaml files." in
   ( Term.(
-      pure run $ Cli.setup $ Cli.file $ Cli.section $ Cli.syntax $ Cli.prelude
-      $ Cli.prelude_str $ Cli.root $ duniverse_mode $ locks),
+      pure run $ Cli.setup $ Cli.file $ Cli.section $ Cli.syntax $ Cli.preludes
+      $ Cli.preludes_str $ Cli.root $ duniverse_mode $ locks),
     Term.info "rule" ~doc )

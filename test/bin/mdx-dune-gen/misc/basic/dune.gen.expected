@@ -1,0 +1,10 @@
+let file = Sys.argv.(1)
+let prelude = ["prelude.ml";"prelude2.ml"]
+
+let dirs = [(*todo*)]
+let _ = Mdx_test.run_exn_defaults
+  ~file
+  ~prelude
+  ~dirs
+  ~packages:[(*todo*)]
+  ~predicates:[(*todo*)]

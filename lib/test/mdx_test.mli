@@ -34,3 +34,11 @@ val run_exn :
   packages:string list ->
   predicates:string list ->
   int
+
+val run_exn_defaults :
+  packages:string list ->
+  predicates:string list ->
+  prelude:string list ->
+  file:string ->
+  dirs:string list ->
+  int

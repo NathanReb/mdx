@@ -385,3 +385,20 @@ module Predicate = struct
 
   let toploop = "toploop"
 end
+
+let run_exn_defaults ~packages ~predicates =
+  let packages =
+    [
+      Package.unix;
+      Package.findlib_top;
+      Package.findlib_internal;
+      Package.compilerlibs_toplevel;
+    ]
+    @ packages
+  in
+  let predicates = [ Predicate.byte; Predicate.toploop ] @ predicates in
+  run_exn ~packages ~predicates ~prelude_str:[] ~non_deterministic:false
+    ~silent_eval:false ~record_backtrace:false ~syntax:None ~silent:false
+    ~verbose_findlib:false ~section:None ~root:None (*todo ?*)
+    ~force_output:false
+    ~output:(Some `Stdout)

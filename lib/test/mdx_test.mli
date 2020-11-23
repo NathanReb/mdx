@@ -36,9 +36,4 @@ val run_exn :
   int
 
 val run_exn_defaults :
-  packages:string list ->
-  predicates:string list ->
-  prelude:string list ->
-  file:string ->
-  directives:Mdx_top.directive list ->
-  int
+  prelude:string list -> file:string -> directives:Mdx_top.directive list -> int

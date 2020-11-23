@@ -28,8 +28,6 @@ let run (`Setup ()) (`Prelude prelude) (`Directories dirs) =
   line "  ~file";
   line "  ~prelude";
   line "  ~directives";
-  line "  ~packages:[(*todo*)]";
-  line "  ~predicates:[(*todo*)]";
   Buffer.output_buffer stdout buffer;
   0
 

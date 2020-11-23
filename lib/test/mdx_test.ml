@@ -274,7 +274,8 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
     match syntax with Some syntax -> Some syntax | None -> Syntax.infer ~file
   in
   let c =
-    Mdx_top.init ~verbose:(not silent_eval) ~silent ~verbose_findlib ~directives ~packages ~predicates ()
+    Mdx_top.init ~verbose:(not silent_eval) ~silent ~verbose_findlib ~directives
+      ~packages ~predicates ()
   in
   let preludes = preludes ~prelude ~prelude_str in
 
@@ -385,7 +386,7 @@ module Predicate = struct
   let toploop = "toploop"
 end
 
-let run_exn_defaults ~packages ~predicates =
+let run_exn_defaults =
   let packages =
     [
       Package.unix;
@@ -393,9 +394,8 @@ let run_exn_defaults ~packages ~predicates =
       Package.findlib_internal;
       Package.compilerlibs_toplevel;
     ]
-    @ packages
   in
-  let predicates = [ Predicate.byte; Predicate.toploop ] @ predicates in
+  let predicates = [ Predicate.byte; Predicate.toploop ] in
   run_exn ~packages ~predicates ~prelude_str:[] ~non_deterministic:false
     ~silent_eval:false ~record_backtrace:false ~syntax:None ~silent:false
     ~verbose_findlib:false ~section:None ~root:None (*todo ?*)

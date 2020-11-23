@@ -1,7 +1,8 @@
 let file = Sys.argv.(1)
 let prelude = ["prelude.ml";"prelude2.ml"]
 
-let dirs = [(*todo*)]
+let dirs = ["/toto/tata";"/toto/titi"]
+
 let _ = Mdx_test.run_exn_defaults
   ~file
   ~prelude

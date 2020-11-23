@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-let run (`Setup ()) (`Prelude prelude) =
+let run (`Setup ()) (`Prelude prelude) (`Directories dirs) =
   let buffer = Buffer.create 1024 in
   let line fmt = Printf.bprintf buffer (fmt ^^ "\n") in
   let list l =
@@ -23,11 +23,11 @@ let run (`Setup ()) (`Prelude prelude) =
   in
   line "let file = Sys.argv.(1)";
   line "let prelude = %s" (list prelude);
-  line "let dirs = [(*todo*)]";
+  line "let directives = Mdx_top.directories %s" (list dirs);
   line "let _ = Mdx_test.run_exn_defaults";
   line "  ~file";
   line "  ~prelude";
-  line "  ~dirs";
+  line "  ~directives";
   line "  ~packages:[(*todo*)]";
   line "  ~predicates:[(*todo*)]";
   Buffer.output_buffer stdout buffer;
@@ -39,4 +39,5 @@ let cmd =
     "Generate the source for a specialized testing binary. This command is \
      meant to be used by dune only. There are no stability guarantees."
   in
-  (Term.(pure run $ Cli.setup $ Cli.prelude), Term.info "dune-gen" ~doc)
+  ( Term.(pure run $ Cli.setup $ Cli.prelude $ Cli.directories),
+    Term.info "dune-gen" ~doc )

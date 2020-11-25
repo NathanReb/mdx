@@ -4,6 +4,8 @@
 
 - Allow to explicitly set the kind of blocks in labels: `ocaml`, `cram`, `toplevel` or `include`. (#237, @gpetiot)
 - Include blocks do not require an empty block anymore (#286, @gpetiot)
+- Add a new `dune-gen` subcommand that generates testing code for Dune to build
+  and run with the new `mdx` stanza. (#305, @voodoos)
 
 #### Changed
 

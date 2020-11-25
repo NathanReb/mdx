@@ -4,7 +4,7 @@
   (with-stdout-to
    %{target}
    (run ocaml-mdx dune-gen --prelude %{dep:prelude.ml} --prelude
-     %{dep:prelude2.ml} --directory /toto/tata --directory /toto/titi))))
+     %{dep:prelude2.ml} --directory /foo/bar --directory /foo/foo))))
 
 (rule
  (alias runtest)

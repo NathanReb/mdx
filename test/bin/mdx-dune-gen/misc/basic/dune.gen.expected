@@ -1,11 +1,9 @@
 let file = Sys.argv.(1)
 let prelude = ["prelude.ml";"prelude2.ml"]
 
-let dirs = ["/toto/tata";"/toto/titi"]
+let directives = Mdx_top.directories ["/foo/bar";"/foo/foo"]
 
 let _ = Mdx_test.run_exn_defaults
   ~file
   ~prelude
-  ~dirs
-  ~packages:[(*todo*)]
-  ~predicates:[(*todo*)]
+  ~directives
